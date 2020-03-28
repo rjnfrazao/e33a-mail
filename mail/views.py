@@ -9,6 +9,11 @@ from django.views.decorators.csrf import csrf_exempt
 
 from .models import User, Email
 
+"""
+View for the main home page.
+
+"""
+
 
 def index(request):
 
@@ -21,6 +26,10 @@ def index(request):
         return HttpResponseRedirect(reverse("login"))
 
 
+"""
+API to send the e-mail. This view is invoked from a javascript action associated to the submitt button (click event).
+
+"""
 @csrf_exempt
 @login_required
 def compose(request):
@@ -34,7 +43,6 @@ def compose(request):
     emails = [email.strip() for email in data.get("recipients").split(",")]
 
     if (emails[0] == ""):
-        print("returned : Error At least one recipient")
         return JsonResponse({
             "error": "At least one recipient required."
         }, status=400)
@@ -78,6 +86,12 @@ def compose(request):
     return JsonResponse({"message": "Email sent successfully."}, status=201)
 
 
+"""
+API to return the mail box requested.
+
+Input : mailbox - Mailbox items to be returned as JSON data. The valid options are : inbox, sent, and archive.
+
+"""
 @login_required
 def mailbox(request, mailbox):
 
@@ -102,6 +116,12 @@ def mailbox(request, mailbox):
     return JsonResponse([email.serialize() for email in emails], safe=False)
 
 
+"""
+API to return an email content.
+
+Input : email_id - ID of the e-mail to be returned.
+
+"""
 @csrf_exempt
 @login_required
 def email(request, email_id):
@@ -135,6 +155,14 @@ def email(request, email_id):
         }, status=400)
 
 
+"""
+API to perform the user's authentication.
+
+Input via post body data : email - user's e-mail / password - userá password.
+
+"""
+
+
 def login_view(request):
     if request.method == "POST":
 
@@ -155,9 +183,23 @@ def login_view(request):
         return render(request, "mail/login.html")
 
 
+"""
+API to perform the user's log out.
+
+"""
+
+
 def logout_view(request):
     logout(request)
     return HttpResponseRedirect(reverse("index"))
+
+
+"""
+API to perform the user's registration.
+
+Input via post body data : email - user's e-mail / password - user's password / confirmation - user's pass confirmation
+
+"""
 
 
 def register(request):

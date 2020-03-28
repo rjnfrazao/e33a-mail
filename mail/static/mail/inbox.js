@@ -34,9 +34,12 @@ document.addEventListener("DOMContentLoaded", function() {
   load_mailbox("inbox");
 });
 
-//REMOVE IT SEEMS FORM VALIDATION IS PERFORMED BY THE API - CHECK
-
+//
+// Send the e-mail. Via invoking the API /emails
+//
 function send_email() {
+  let error_msg = "";
+
   fetch("/emails", {
     method: "POST",
     body: JSON.stringify({
@@ -44,38 +47,43 @@ function send_email() {
       subject: document.querySelector("#compose-subject").value,
       body: document.querySelector("#compose-body").value
     })
-  })
-    .then(response => response.json())
-    //.then(response => {
-    //  if (response.ok) {
-    //    response.json().then(json => {
-    //      console.log(json);
-    //    });
-    //  }
-    //})
-    .then(result => {
-      // Print result
-      console.alert("Result executed.");
-      console.log(result);
-      if (result.error) {
-        document.querySelector("#error-message").innerHTML = result.error;
-      } else {
-        // load mailbox content tab
-        load_mailbox("inbox");
-      }
-      return false;
-    });
+  }).then(function(response) {
+    if (response.status >= 200 && response.status < 300) {
+      // E-mail send successfully
+      // hide div with used to display error message
+      document.querySelector("#error-message").innerHTML = "";
+      document.querySelector("#error-message").style.display = "none";
+      load_mailbox("inbox");
+    } else {
+      // Error was returned. Extract error content.
+      response.json().then(function(data) {
+        //console.log(data);
+        error_msg = data.error;
+
+        // Display error message.
+        document.querySelector("#error-message").innerHTML = data.error;
+        document.querySelector("#error-message").style.display = "block";
+        window.scrollTo(0, 0);
+        return false;
+      });
+    }
+  });
 }
 
+// Open the form to compose the e-mail.
+// input :
+//  Reply = True - render the from with pre-filled information to reply the e-mail.
+//  Reply = False - Open the form to submit a new e-mail.
+//
 function compose_email(reply) {
   // Show compose view and hide other views
   document.querySelector("#emails-view").style.display = "none";
   document.querySelector("#compose-view").style.display = "block";
+  document.querySelector("#error-message").style.display = "none";
 
-  // Clear out composition fields
   if (reply) {
     // Reply, so pre-fill the form fields.
-    if (temp_subject.substring[(0, 3)] != "Re: ") {
+    if (temp_subject.substring(0, 3) != "Re:") {
       document.querySelector("#compose-subject").value = "Re: " + temp_subject;
     } else {
       document.querySelector("#compose-subject").value = temp_subject;
@@ -93,6 +101,7 @@ function compose_email(reply) {
 }
 
 //
+// load the mailbox requested via input field
 // input : mailbox - Mailbox to be presented. The valid options are : inbox, sent, and archive.
 //
 function load_mailbox(mailbox) {
