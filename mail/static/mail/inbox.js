@@ -1,12 +1,12 @@
 // Variable used to allow the button Archive / Unarchived been alternated according the mailbox displayed.
-var current_mailbox = "";
+let current_mailbox = "";
 
 // Variables used to transfer data from the email_view to the compose_form, when clicked the reply button.
-var temp_sender = "";
-var temp_subject = "";
-var temp_body = "";
-var temp_recipients = "";
-var temp_timestamp = "";
+let temp_sender = "";
+let temp_subject = "";
+let temp_body = "";
+let temp_recipients = "";
+let temp_timestamp = "";
 
 document.addEventListener("DOMContentLoaded", function() {
   // Use buttons to toggle between views
@@ -68,6 +68,7 @@ function send_email() {
       });
     }
   });
+  event.preventDefault();
 }
 
 // Open the form to compose the e-mail.
@@ -91,7 +92,7 @@ function compose_email(reply) {
     document.querySelector("#compose-recipients").value = temp_sender; // Reply to the sender.
     document.querySelector(
       "#compose-body"
-    ).value = `${temp_timestamp}  ${temp_sender} wrote: \n ${temp_body}`;
+    ).value = `\n\n${temp_timestamp}  ${temp_sender} wrote: \n ${temp_body}`;
   } else {
     // Not a reply, so clear out composition fields
     document.querySelector("#compose-recipients").value = "";
@@ -171,6 +172,7 @@ function archive_email(email_id, operation) {
   }).then(response => {
     load_mailbox("inbox");
   });
+  event.preventDefault();
 }
 
 //
